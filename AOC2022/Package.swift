@@ -17,13 +17,25 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.2.0"),
-        .package(url: "https://github.com/pointfreeco/swift-parsing.git", from: "0.10.0")
+        .package(
+            url: "https://github.com/apple/swift-argument-parser.git",
+            from: "1.2.0"
+        ),
+        .package(
+            url: "https://github.com/pointfreeco/swift-parsing.git",
+            from: "0.10.0"
+        ),
+        .package(
+            url: "https://github.com/pointfreeco/swift-custom-dump.git",
+            from: "0.6.1"
+        )
     ],
     targets: [
         .target(
             name: "AOC2022",
-            dependencies: []
+            dependencies: [
+                .product(name: "Parsing", package: "swift-parsing")
+            ]
         ),
         .executableTarget(
             name: "Runtime",
@@ -34,7 +46,10 @@ let package = Package(
         ),
         .testTarget(
             name: "AOC2022Tests",
-            dependencies: ["AOC2022"]
+            dependencies: [
+                "AOC2022",
+                .product(name: "CustomDump", package: "swift-custom-dump")
+            ]
         ),
     ]
 )

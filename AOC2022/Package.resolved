@@ -19,6 +19,15 @@
       }
     },
     {
+      "identity" : "swift-custom-dump",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pointfreeco/swift-custom-dump.git",
+      "state" : {
+        "revision" : "ead7d30cc224c3642c150b546f4f1080d1c411a8",
+        "version" : "0.6.1"
+      }
+    },
+    {
       "identity" : "swift-parsing",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/swift-parsing.git",

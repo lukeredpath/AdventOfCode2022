@@ -10,9 +10,17 @@ public enum Puzzle: String, CaseIterable {
     case partTwo
 }
 
+struct Printer {
+    var print: (String) -> Void
+
+    static let liveValue = Self { Swift.print($0) }
+}
+
 protocol Solution {
     func runPartOne(input: Data) async throws
     func runPartTwo(input: Data) async throws
+
+    init(printer: Printer)
 }
 
 public func notImplemented() {
@@ -22,9 +30,17 @@ public func notImplemented() {
 public func runSolution(for day: Day, puzzle: Puzzle, input: Data) async throws {
     switch day {
     case .one:
-        try await runSolution(Day01(), puzzle: puzzle, input: input)
+        try await runSolution(
+            Day01(printer: .liveValue),
+            puzzle: puzzle,
+            input: input
+        )
     case .two:
-        try await runSolution(Day02(), puzzle: puzzle, input: input)
+        try await runSolution(
+            Day02(printer: .liveValue),
+            puzzle: puzzle,
+            input: input
+        )
     }
 }
 
