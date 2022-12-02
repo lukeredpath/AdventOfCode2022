@@ -10,45 +10,45 @@ public enum Puzzle: String, CaseIterable {
     case partTwo
 }
 
-struct Printer {
-    var print: (String) -> Void
-
-    static let liveValue = Self { Swift.print($0) }
-}
-
 protocol Solution {
-    func runPartOne(input: Data) async throws
-    func runPartTwo(input: Data) async throws
-
-    init(printer: Printer)
+    func runPartOne(input: Data) async throws -> String
+    func runPartTwo(input: Data) async throws -> String
 }
 
-public func notImplemented() {
-    print("Solution not yet implemented")
-}
+struct NotImplemented: Error {}
 
 public func runSolution(for day: Day, puzzle: Puzzle, input: Data) async throws {
-    switch day {
-    case .one:
-        try await runSolution(
-            Day01(printer: .liveValue),
-            puzzle: puzzle,
-            input: input
-        )
-    case .two:
-        try await runSolution(
-            Day02(printer: .liveValue),
-            puzzle: puzzle,
-            input: input
-        )
+    do {
+        switch day {
+        case .one:
+            try await runSolution(
+                Day01(),
+                puzzle: puzzle,
+                input: input
+            )
+        case .two:
+            try await runSolution(
+                Day02(),
+                puzzle: puzzle,
+                input: input
+            )
+        }
+    } catch is NotImplemented {
+        print("Not yet implemented")
+    } catch {
+        print("Unexpected error: \(error)")
     }
 }
 
 private func runSolution(_ solution: Solution, puzzle: Puzzle, input: Data) async throws {
     switch puzzle {
     case .partOne:
-        try await solution.runPartOne(input: input)
+        try await printAnswer(solution.runPartOne(input: input))
     case .partTwo:
-        try await solution.runPartTwo(input: input)
+        try await printAnswer(solution.runPartTwo(input: input))
     }
+}
+
+private func printAnswer(_ answer: String) {
+    print("The answer is: \(answer)")
 }

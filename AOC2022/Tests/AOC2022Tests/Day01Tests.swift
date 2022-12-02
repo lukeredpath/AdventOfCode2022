@@ -19,7 +19,7 @@ final class Day01Tests: XCTestCase {
     9000
 
     10000
-    
+
     """
 
     func testParsing() throws {
@@ -36,12 +36,13 @@ final class Day01Tests: XCTestCase {
         )
     }
 
-    func testSampleSolution() async throws {
-        var output = ""
-        let puzzle = Day01(printer: .init(print: {
-            output += $0
-        }))
-        try await puzzle.runPartOne(input: sampleInput.data(using: .utf8)!)
-        XCTAssertEqual(output, "The highest total number of calories is 24000")
+    func testSampleSolution_PartOne() async throws {
+        let answer = try await Day01().runPartOne(input: sampleInput.data(using: .utf8)!)
+        XCTAssertEqual(answer, "24000")
+    }
+
+    func testSampleSolution_PartTwo() async throws {
+        let answer = try await Day01().runPartTwo(input: sampleInput.data(using: .utf8)!)
+        XCTAssertEqual(answer, "45000")
     }
 }

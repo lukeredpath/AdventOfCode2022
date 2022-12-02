@@ -2,21 +2,18 @@ import Foundation
 import Parsing
 
 struct Day01: Solution {
-    var printer: Printer
-
-    init(printer: Printer) {
-        self.printer = printer
-    }
-
-    func runPartOne(input: Data) async throws {
+    func runPartOne(input: Data) async throws -> String {
         let input = String(data: input, encoding: .utf8)!
         let calories = try Parsers.parseInput(input)
         let sorted = calories.sorted { $0 > $1 }
-        printer.print("The highest total number of calories is \(sorted.first!)")
+        return String(sorted.first!)
     }
 
-    func runPartTwo(input: Data) async throws {
-        notImplemented()
+    func runPartTwo(input: Data) async throws -> String {
+        let input = String(data: input, encoding: .utf8)!
+        let calories = try Parsers.parseInput(input)
+        let topThreeTotal = calories.sorted { $0 > $1 }.prefix(3).reduce(0, +)
+        return String(topThreeTotal)
     }
 
     enum Parsers {
