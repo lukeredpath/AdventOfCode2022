@@ -4,19 +4,28 @@ import Parsing
 struct Day02: Solution {
     func runPartOne(input: Data) async throws -> String {
         let inputString = String(data: input, encoding: .utf8)!
-        let rounds = try Parsers.parseInput(inputString)
+        let rounds = try Parsers.roundsPartOne.parse(Substring(inputString))
         let scores = rounds.map(calculateRoundScore)
         return String(scores.reduce(0, +))
     }
 
     func runPartTwo(input: Data) async throws -> String {
-        throw NotImplemented()
+        let inputString = String(data: input, encoding: .utf8)!
+        let rounds = try Parsers.roundsPartTwo.parse(Substring(inputString))
+        let scores = rounds.map(calculateRoundScore)
+        return String(scores.reduce(0, +))
     }
 
     enum Shape: Int {
         case rock = 1
         case paper = 2
         case scissors = 3
+    }
+
+    enum DesiredResult: Int {
+        case win = 6
+        case loss = 0
+        case draw = 3
     }
 
     func calculateRoundScore(opponent: Shape, response: Shape) -> Int {
@@ -30,11 +39,20 @@ struct Day02: Solution {
         }
     }
 
-    enum Parsers {
-        static func parseInput(_ input: String) throws -> [(Shape, Shape)] {
-            try rounds.parse(Substring(input))
+    func calculateRoundScore(opponent: Shape, desiredResult: DesiredResult) -> Int {
+        switch (opponent, desiredResult) {
+        case (.rock, .win), (.scissors, .loss):
+            return desiredResult.rawValue + Shape.paper.rawValue
+        case (.paper, .win), (.rock, .loss):
+            return desiredResult.rawValue + Shape.scissors.rawValue
+        case (.scissors, .win), (.paper, .loss):
+            return desiredResult.rawValue + Shape.rock.rawValue
+        case (_, .draw):
+            return desiredResult.rawValue + opponent.rawValue
         }
+    }
 
+    enum Parsers {
         static let opponent = OneOf {
             "A".map(.case(Shape.rock))
             "B".map(.case(Shape.paper))
@@ -47,9 +65,25 @@ struct Day02: Solution {
             "Z".map(.case(Shape.scissors))
         }
 
-        static let rounds = Parse {
+        static let desiredResult = OneOf {
+            "X".map(.case(DesiredResult.loss))
+            "Y".map(.case(DesiredResult.draw))
+            "Z".map(.case(DesiredResult.win))
+        }
+
+        static let roundsPartOne = Parse {
             Many {
                 opponent; " "; response
+            } separator: {
+                Whitespace(1, .vertical)
+            }
+            Whitespace(1, .vertical)
+            End()
+        }
+
+        static let roundsPartTwo = Parse {
+            Many {
+                opponent; " "; desiredResult
             } separator: {
                 Whitespace(1, .vertical)
             }
