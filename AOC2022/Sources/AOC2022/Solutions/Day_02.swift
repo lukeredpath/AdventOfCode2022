@@ -1,7 +1,11 @@
 import Foundation
 
-enum Day02 {
-    static func run() async throws {
+struct Day02: Solution {
+    func runPartOne() async throws {
+        notImplemented()
+    }
+
+    func runPartTwo() async throws {
         notImplemented()
     }
 }

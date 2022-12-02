@@ -9,13 +9,17 @@ struct Runtime: AsyncParsableCommand {
         abstract: "A command for running AOC2022 solutions"
     )
 
-    @Argument(help: "Which day's solution to run")
-    private var solution: Solution
+    @Argument(help: "Which day's puzzle to solve.")
+    private var day: Day
+
+    @Option(help: "Which puzzle part to solve.")
+    private var puzzle: Puzzle = .partOne
 
     mutating func run() async throws {
-        print("Running solution for day \(solution.rawValue):")
-        try await runSolution(solution)
+        print("Running solution for Day \(day.rawValue) (\(puzzle.rawValue)):")
+        try await runSolution(for: day, puzzle: .partTwo)
     }
 }
 
-extension Solution: ExpressibleByArgument {}
+extension Day: ExpressibleByArgument {}
+extension Puzzle: ExpressibleByArgument {}
