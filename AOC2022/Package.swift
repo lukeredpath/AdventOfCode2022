@@ -5,6 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "AOC2022",
+    platforms: [.macOS(.v10_15)],
     products: [
         .library(
             name: "AOC2022",
