@@ -3,6 +3,7 @@ import Foundation
 public enum Day: Int {
     case one = 1
     case two
+    case three
 }
 
 public enum Puzzle: String, CaseIterable {
@@ -29,6 +30,12 @@ public func runSolution(for day: Day, puzzle: Puzzle, input: Data) async throws 
         case .two:
             try await runSolution(
                 Day02(),
+                puzzle: puzzle,
+                input: input
+            )
+        case .three:
+            try await runSolution(
+                Day03(),
                 puzzle: puzzle,
                 input: input
             )
