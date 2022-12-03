@@ -74,8 +74,7 @@ struct Day03: Solution {
     func findBadges(in elfGroups: [[Rucksack]]) -> [Character] {
         elfGroups.reduce([]) { partialResult, rucksacks in
             guard rucksacks.count > 0 else { return partialResult }
-            let initialSet = Set<Character>(uniqueContents(of: rucksacks[0]))
-            return partialResult + rucksacks.dropFirst().reduce(initialSet) {
+            return partialResult + rucksacks.dropFirst().reduce(uniqueContents(of: rucksacks[0])) {
                 $0.intersection(uniqueContents(of: $1))
             }
         }
