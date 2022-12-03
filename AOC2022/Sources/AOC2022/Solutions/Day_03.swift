@@ -27,7 +27,8 @@ struct Day03: Solution {
     typealias Rucksack = (left: Set<Character>, right: Set<Character>)
     
     func parseInput(_ input: String) -> [Rucksack] {
-        input.components(separatedBy: .newlines).map { line -> Rucksack in
+        input.components(separatedBy: .newlines).compactMap { line -> Rucksack? in
+            guard !line.isEmpty else { return nil }
             let midIndex = line.index(line.startIndex, offsetBy: (line.count / 2))
             let leftChars = Array(line[line.startIndex..<midIndex])
             let rightChars = Array(line[midIndex..<line.endIndex])
@@ -61,8 +62,12 @@ struct Day03: Solution {
     }
     
     func findElfGroups(in rucksacks: [Rucksack]) -> [[Rucksack]] {
-        stride(from: rucksacks.startIndex, to: rucksacks.endIndex, by: 3).map { index in
-            Array(rucksacks[index...index + 2])
+        return stride(from: rucksacks.startIndex, to: rucksacks.endIndex, by: 3).map { index in
+            var upperBound = index + 2
+            if upperBound > rucksacks.count {
+                upperBound = rucksacks.indices.upperBound
+            }
+            return Array(rucksacks[index...upperBound])
         }
     }
     
