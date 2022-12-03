@@ -62,7 +62,7 @@ struct Day03: Solution {
     }
     
     func findElfGroups(in rucksacks: [Rucksack]) -> [[Rucksack]] {
-        return stride(from: rucksacks.startIndex, to: rucksacks.endIndex, by: 3).map { index in
+        stride(from: rucksacks.startIndex, to: rucksacks.endIndex, by: 3).map { index in
             var upperBound = index + 2
             if upperBound > rucksacks.count {
                 upperBound = rucksacks.indices.upperBound
