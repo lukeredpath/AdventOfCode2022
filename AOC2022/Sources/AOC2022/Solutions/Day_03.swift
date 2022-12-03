@@ -7,8 +7,8 @@ struct Day03: Solution {
         let inputString = String(data: input, encoding: .utf8)!
         return pipe(
             parseInput,
-            findErrors(in:),
-            calculatePriorityScore(for:),
+            findErrors,
+            calculatePriorityScore,
             String.init
         )(inputString)
     }
@@ -17,9 +17,9 @@ struct Day03: Solution {
         let inputString = String(data: input, encoding: .utf8)!
         return pipe(
             parseInput,
-            findElfGroups(in:),
-            findBadges(in:),
-            calculatePriorityScore(for:),
+            findElfGroups,
+            findBadges,
+            calculatePriorityScore,
             String.init
         )(inputString)
     }
