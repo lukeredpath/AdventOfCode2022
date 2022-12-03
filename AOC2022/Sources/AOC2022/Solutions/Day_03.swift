@@ -5,7 +5,7 @@ import Parsing
 struct Day03: Solution {
     func runPartOne(input: Data) async throws -> String {
         pipe(
-            stringFromData,
+            utf8String,
             parseInput,
             findErrors,
             calculatePriorityScore,
@@ -15,7 +15,7 @@ struct Day03: Solution {
 
     func runPartTwo(input: Data) async throws -> String {
         pipe(
-            stringFromData,
+            utf8String,
             parseInput,
             findElfGroups,
             findBadges,

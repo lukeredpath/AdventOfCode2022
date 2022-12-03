@@ -56,7 +56,7 @@ private func printAnswer(_ answer: String) {
 
 // MARK: - Utility
 
-func stringFromData(_ data: Data) -> String {
+func utf8String(from data: Data) -> String {
     // Force unwrap here because if it fails, the input is bad anyway.
     String(data: data, encoding: .utf8)!
 }
