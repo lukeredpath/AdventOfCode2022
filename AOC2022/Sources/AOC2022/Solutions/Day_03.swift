@@ -5,18 +5,23 @@ import Parsing
 struct Day03: Solution {
     func runPartOne(input: Data) async throws -> String {
         let inputString = String(data: input, encoding: .utf8)!
-        let transform: (String) -> String = pipe(
+        return pipe(
             parseInput,
             findErrors(in:),
             calculatePriorityScore(for:),
             String.init
-        )
-        return transform(inputString)
+        )(inputString)
     }
 
     func runPartTwo(input: Data) async throws -> String {
-//        let inputString = String(data: input, encoding: .utf8)!
-        return ""
+        let inputString = String(data: input, encoding: .utf8)!
+        return pipe(
+            parseInput,
+            findElfGroups(in:),
+            findBadges(in:),
+            calculatePriorityScore(for:),
+            String.init
+        )(inputString)
     }
     
     typealias Rucksack = (left: Set<Character>, right: Set<Character>)
@@ -31,17 +36,16 @@ struct Day03: Solution {
     }
     
     func findErrors(in rucksacks: [Rucksack]) -> [Character] {
-        let errors = rucksacks.reduce([]) { partialResult, rucksack in
+        rucksacks.reduce([]) { partialResult, rucksack in
             partialResult + rucksack.left.intersection(rucksack.right)
         }
-        return errors
     }
     
-    func calculatePriorityScore(for errors: [Character]) -> Int {
+    func calculatePriorityScore(for characters: [Character]) -> Int {
         // Because I'm lazy and cannot be bothered to hand-write a map of
         // characters to score values, I can cheat and take advantage of the
         // character's ascii value with an offset.
-        errors.reduce(0) { partialResult, character in
+        characters.reduce(0) { partialResult, character in
             // Let's be safe and check for valid input
             guard character.isASCII, let asciiValue = character.asciiValue else {
                 return partialResult
@@ -54,5 +58,26 @@ struct Day03: Solution {
                 return partialResult + Int(asciiValue) - 38
             }
         }
+    }
+    
+    func findElfGroups(in rucksacks: [Rucksack]) -> [[Rucksack]] {
+        let groupCount = rucksacks.count / 3
+        return (0..<groupCount).reduce(into: []) { partialResult, groupNumber in
+            partialResult.append(Array(rucksacks.dropFirst(groupNumber * 3).prefix(3)))
+        }
+    }
+    
+    func findBadges(in elfGroups: [[Rucksack]]) -> [Character] {
+        elfGroups.reduce([]) { partialResult, rucksacks in
+            guard rucksacks.count > 0 else { return partialResult }
+            let initialSet = Set<Character>(uniqueContents(of: rucksacks[0]))
+            return partialResult + rucksacks.dropFirst().reduce(initialSet) {
+                $0.intersection(uniqueContents(of: $1))
+            }
+        }
+    }
+    
+    private func uniqueContents(of rucksack: Rucksack) -> Set<Character> {
+        rucksack.left.union(rucksack.right)
     }
 }
