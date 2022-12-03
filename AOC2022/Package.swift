@@ -28,13 +28,18 @@ let package = Package(
         .package(
             url: "https://github.com/pointfreeco/swift-custom-dump.git",
             from: "0.6.1"
+        ),
+        .package(
+            url: "https://github.com/pointfreeco/swift-overture.git",
+            from: "0.5.0"
         )
     ],
     targets: [
         .target(
             name: "AOC2022",
             dependencies: [
-                .product(name: "Parsing", package: "swift-parsing")
+                .product(name: "Parsing", package: "swift-parsing"),
+                .product(name: "Overture", package: "swift-overture")
             ]
         ),
         .executableTarget(
