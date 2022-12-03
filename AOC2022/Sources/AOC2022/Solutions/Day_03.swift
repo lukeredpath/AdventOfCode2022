@@ -61,9 +61,8 @@ struct Day03: Solution {
     }
     
     func findElfGroups(in rucksacks: [Rucksack]) -> [[Rucksack]] {
-        let groupCount = rucksacks.count / 3
-        return (0..<groupCount).reduce(into: []) { partialResult, groupNumber in
-            partialResult.append(Array(rucksacks.dropFirst(groupNumber * 3).prefix(3)))
+        stride(from: rucksacks.startIndex, to: rucksacks.endIndex, by: 3).map { index in
+            Array(rucksacks[index...index + 2])
         }
     }
     
