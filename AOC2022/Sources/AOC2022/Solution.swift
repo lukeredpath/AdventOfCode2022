@@ -53,3 +53,11 @@ public func runSolution(for day: Day, puzzle: Puzzle, input: Data) async throws 
 private func printAnswer(_ answer: String) {
     print("The answer is: \(answer)")
 }
+
+// MARK: - Utility
+
+func stringFromData(_ data: Data) -> String {
+    // Force unwrap here because if it fails, the input is bad anyway.
+    String(data: data, encoding: .utf8)!
+}
+

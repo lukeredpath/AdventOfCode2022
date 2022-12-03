@@ -4,24 +4,24 @@ import Parsing
 
 struct Day03: Solution {
     func runPartOne(input: Data) async throws -> String {
-        let inputString = String(data: input, encoding: .utf8)!
-        return pipe(
+        pipe(
+            stringFromData,
             parseInput,
             findErrors,
             calculatePriorityScore,
             String.init
-        )(inputString)
+        )(input)
     }
 
     func runPartTwo(input: Data) async throws -> String {
-        let inputString = String(data: input, encoding: .utf8)!
-        return pipe(
+        pipe(
+            stringFromData,
             parseInput,
             findElfGroups,
             findBadges,
             calculatePriorityScore,
             String.init
-        )(inputString)
+        )(input)
     }
     
     typealias Rucksack = (left: Set<Character>, right: Set<Character>)
