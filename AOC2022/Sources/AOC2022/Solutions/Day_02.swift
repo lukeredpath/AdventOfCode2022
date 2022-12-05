@@ -3,15 +3,13 @@ import Parsing
 
 struct Day02: Solution {
     func runPartOne(input: Data) async throws -> String {
-        let inputString = String(data: input, encoding: .utf8)!
-        let rounds = try Parsers.roundsPartOne.parse(Substring(inputString))
+        let rounds = try Parsers.roundsPartOne.parse(utf8String(from: input))
         let scores = rounds.map(calculateRoundScore)
         return String(scores.reduce(0, +))
     }
 
     func runPartTwo(input: Data) async throws -> String {
-        let inputString = String(data: input, encoding: .utf8)!
-        let rounds = try Parsers.roundsPartTwo.parse(Substring(inputString))
+        let rounds = try Parsers.roundsPartTwo.parse(utf8String(from: input))
         let scores = rounds.map(calculateRoundScore)
         return String(scores.reduce(0, +))
     }
@@ -71,24 +69,16 @@ struct Day02: Solution {
             "Z".map(.case(DesiredResult.win))
         }
 
-        static let roundsPartOne = Parse {
-            Many {
-                opponent; " "; response
-            } separator: {
-                Whitespace(1, .vertical)
-            }
+        static let roundsPartOne = Many {
+            opponent; " "; response
+        } separator: {
             Whitespace(1, .vertical)
-            End()
         }
 
-        static let roundsPartTwo = Parse {
-            Many {
-                opponent; " "; desiredResult
-            } separator: {
-                Whitespace(1, .vertical)
-            }
+        static let roundsPartTwo = Many {
+            opponent; " "; desiredResult
+        } separator: {
             Whitespace(1, .vertical)
-            End()
         }
     }
 }

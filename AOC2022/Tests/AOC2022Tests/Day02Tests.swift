@@ -8,7 +8,6 @@ final class Day02Tests: XCTestCase {
     A Y
     B X
     C Z
-
     """
 
     func testSampleSolution_PartOne() async throws {

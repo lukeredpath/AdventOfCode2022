@@ -19,7 +19,6 @@ final class Day01Tests: XCTestCase {
     9000
 
     10000
-
     """
 
     func testParsing() throws {
@@ -32,7 +31,7 @@ final class Day01Tests: XCTestCase {
         ]
         XCTAssertNoDifference(
             expected,
-            try Day01.Parsers.parseInput(sampleInput)
+            try Day01.Parsers.allElves.parse(sampleInput)
         )
     }
 
