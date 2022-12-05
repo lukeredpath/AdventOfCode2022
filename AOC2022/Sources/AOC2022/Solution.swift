@@ -61,6 +61,10 @@ private func printAnswer(_ answer: String) {
 
 func utf8String(from data: Data) -> String {
     // Force unwrap here because if it fails, the input is bad anyway.
-    String(data: data, encoding: .utf8)!
+    let string = String(data: data, encoding: .utf8)!
+    // Sanitize the input, for some reason the input file seems to have
+    // a trailing new line that breaks the parsers.
+    return string.trimmingCharacters(in: .whitespacesAndNewlines)
+    
 }
 
