@@ -16,13 +16,32 @@ final class Day04Tests: XCTestCase {
     func testCountOverlaps() {
         let solution = Day04()
         XCTAssertEqual(0, solution.countOverlappingAssignments(
-            in: [(Range(uncheckedBounds: (2, 4)), Range(uncheckedBounds: (6, 8)))]
-        ))
-        XCTAssertEqual(0, solution.countOverlappingAssignments(
-            in: [(Range(uncheckedBounds: (5, 8)), Range(uncheckedBounds: (7, 9)))]
+            in: [(2...4, 6...8)]
         ))
         XCTAssertEqual(1, solution.countOverlappingAssignments(
-            in: [(Range(uncheckedBounds: (5, 9)), Range(uncheckedBounds: (6, 8)))]
+            in: [(5...8, 7...9)]
+        ))
+        XCTAssertEqual(1, solution.countOverlappingAssignments(
+            in: [(5...9, 6...8)]
+        ))
+        XCTAssertEqual(1, solution.countOverlappingAssignments(
+            in: [(6...6, 4...6)]
+        ))
+    }
+    
+    func testCountFullyContained() {
+        let solution = Day04()
+        XCTAssertEqual(0, solution.countFullyContainedAssignments(
+            in: [(2...4, 6...8)]
+        ))
+        XCTAssertEqual(0, solution.countFullyContainedAssignments(
+            in: [(5...8, 7...9)]
+        ))
+        XCTAssertEqual(1, solution.countFullyContainedAssignments(
+            in: [(5...9, 6...8)]
+        ))
+        XCTAssertEqual(1, solution.countFullyContainedAssignments(
+            in: [(5...9, 2...11)]
         ))
     }
     
@@ -30,5 +49,11 @@ final class Day04Tests: XCTestCase {
         let solution = Day04()
         let answer = try await solution.runPartOne(input: sampleInput.data(using: .utf8)!)
         XCTAssertEqual(answer, "2")
+    }
+    
+    func testSampleSolution_PartTwo() async throws {
+        let solution = Day04()
+        let answer = try await solution.runPartTwo(input: sampleInput.data(using: .utf8)!)
+        XCTAssertEqual(answer, "4")
     }
 }

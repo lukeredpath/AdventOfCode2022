@@ -7,20 +7,31 @@ struct Day04: Solution {
         try pipe(
             utf8String,
             Parsers.input.parse,
-            countOverlappingAssignments,
+            countFullyContainedAssignments,
             String.init
         )(input)
     }
 
     func runPartTwo(input: Data) async throws -> String {
-        ""
+        try pipe(
+            utf8String,
+            Parsers.input.parse,
+            countOverlappingAssignments,
+            String.init
+        )(input)
     }
     
-    typealias Assignment = Range<Int>
+    typealias Assignment = ClosedRange<Int>
+    
+    func countFullyContainedAssignments(in pairs: [(Assignment, Assignment)]) -> Int {
+        pairs.filter { pair in
+            pair.0.fullyContains(pair.1) || pair.1.fullyContains(pair.0)
+        }.count
+    }
     
     func countOverlappingAssignments(in pairs: [(Assignment, Assignment)]) -> Int {
         pairs.filter { pair in
-            pair.0.fullyContains(pair.1) || pair.1.fullyContains(pair.0)
+            pair.0.overlaps(pair.1) || pair.1.overlaps(pair.0)
         }.count
     }
     
@@ -45,7 +56,7 @@ struct Day04: Solution {
     }
 }
 
-extension Range {
+extension ClosedRange {
     func fullyContains(_ otherRange: Self) -> Bool {
         lowerBound <= otherRange.lowerBound && upperBound >= otherRange.upperBound
     }
