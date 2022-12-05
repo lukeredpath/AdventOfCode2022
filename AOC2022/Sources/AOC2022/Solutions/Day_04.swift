@@ -58,6 +58,7 @@ struct Day04: Solution {
 
 extension ClosedRange {
     func fullyContains(_ otherRange: Self) -> Bool {
+        // note: on macOS 13 I could just use the built-in .contains method.
         lowerBound <= otherRange.lowerBound && upperBound >= otherRange.upperBound
     }
 }
