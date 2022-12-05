@@ -30,9 +30,7 @@ struct Day04: Solution {
     }
     
     func countOverlappingAssignments(in pairs: [(Assignment, Assignment)]) -> Int {
-        pairs.filter { pair in
-            pair.0.overlaps(pair.1) || pair.1.overlaps(pair.0)
-        }.count
+        pairs.filter { $0.0.overlaps($0.1) }.count
     }
     
     enum Parsers {
