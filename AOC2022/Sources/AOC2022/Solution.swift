@@ -68,6 +68,5 @@ func utf8String(from data: Data) -> String {
     // Sanitize the input, for some reason the input file seems to have
     // a trailing new line that breaks the parsers.
     return string.trimmingCharacters(in: .whitespacesAndNewlines)
-    
 }
 
