@@ -7,18 +7,28 @@ struct Day05: Solution {
         try pipe(
             { String(data: $0, encoding: .utf8)! },
             Parsers.input.parse,
-            applyMovements,
+            with(.movesOneAtATime, curry(applyMovements)),
             extractMessage
         )(input)
     }
 
     func runPartTwo(input: Data) async throws -> String {
-        throw NotImplemented()
+        try pipe(
+            { String(data: $0, encoding: .utf8)! },
+            Parsers.input.parse,
+            with(.movesMultiple, curry(applyMovements)),
+            extractMessage
+        )(input)
     }
     
-    func applyMovements(_ input: PuzzleInput) -> Stacks {
+    func applyMovements(mode: CraneMode, input: PuzzleInput) -> Stacks {
         input.instructions.reduce(into: input.stacks) { stacks, movement in
-            stacks.applyMovement(movement)
+            switch mode {
+            case .movesOneAtATime:
+                stacks.applyMovementSingularCrates(movement)
+            case .movesMultiple:
+                stacks.applyMovementMultipleCrates(movement)
+            }
         }
     }
     
@@ -49,11 +59,19 @@ struct Day05: Solution {
             }
         }
         
-        mutating func applyMovement(_ movement: CrateMovement) {
+        mutating func applyMovementSingularCrates(_ movement: CrateMovement) {
             for _ in 0..<movement.count {
-                let popped = stacks[movement.fromStack - 1].removeLast()
-                stacks[movement.toStack - 1].append(popped)
+                let toInsert = stacks[movement.fromStack - 1].removeLast()
+                stacks[movement.toStack - 1].append(toInsert)
             }
+        }
+        
+        mutating func applyMovementMultipleCrates(_ movement: CrateMovement) {
+            let stackCount = stacks[movement.fromStack - 1].count
+            let fromIndex = stackCount - movement.count
+            let toInsert = stacks[movement.fromStack - 1][fromIndex..<stackCount]
+            stacks[movement.fromStack - 1].removeLast(movement.count)
+            stacks[movement.toStack - 1].append(contentsOf: toInsert)
         }
     }
     
@@ -61,6 +79,11 @@ struct Day05: Solution {
         let count: Int
         let fromStack: Int
         let toStack: Int
+    }
+    
+    enum CraneMode {
+        case movesOneAtATime
+        case movesMultiple
     }
     
     typealias PuzzleInput = (stacks: Stacks, instructions: [CrateMovement])

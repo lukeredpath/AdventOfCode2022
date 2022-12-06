@@ -65,7 +65,7 @@ final class Day05Tests: XCTestCase {
             ["G"]
         ])
         
-        stacks.applyMovement(.init(count: 1, fromStack: 2, toStack: 3))
+        stacks.applyMovementSingularCrates(.init(count: 1, fromStack: 2, toStack: 3))
         
         XCTAssertNoDifference(stacks.stacks, [
             ["A"],
@@ -74,13 +74,22 @@ final class Day05Tests: XCTestCase {
             ["G"]
         ])
         
-        stacks.applyMovement(.init(count: 2, fromStack: 3, toStack: 1))
+        stacks.applyMovementSingularCrates(.init(count: 2, fromStack: 3, toStack: 1))
         
         XCTAssertNoDifference(stacks.stacks, [
             ["A", "C", "F"],
             ["B"],
             ["D", "E"],
             ["G"]
+        ])
+        
+        stacks.applyMovementMultipleCrates(.init(count: 2, fromStack: 1, toStack: 4))
+        
+        XCTAssertNoDifference(stacks.stacks, [
+            ["A"],
+            ["B"],
+            ["D", "E"],
+            ["G", "C", "F"]
         ])
     }
     
@@ -90,9 +99,9 @@ final class Day05Tests: XCTestCase {
         XCTAssertEqual(answer, "CMZ")
     }
     
-    func _testSampleSolution_PartTwo() async throws {
+    func testSampleSolution_PartTwo() async throws {
         let solution = Day05()
         let answer = try await solution.runPartTwo(input: sampleInput.data(using: .utf8)!)
-        XCTAssertEqual(answer, "")
+        XCTAssertEqual(answer, "MCD")
     }
 }
