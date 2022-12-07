@@ -41,9 +41,6 @@ struct Day07: Solution {
 
     func calculateSizeMap(from commands: [Command]) -> [Dir: Int] {
         var sizeMap: [Dir: Int] = [:]
-        // We'll track the node path and sizes using UUIDs because
-        // that guarantees a unique key for each node even if there
-        // are directories with the same name at different depths.
         var path: [Dir] = []
         for command in commands {
             switch command {
