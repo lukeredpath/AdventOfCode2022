@@ -39,7 +39,8 @@ let package = Package(
             name: "AOC2022",
             dependencies: [
                 .product(name: "Parsing", package: "swift-parsing"),
-                .product(name: "Overture", package: "swift-overture")
+                .product(name: "Overture", package: "swift-overture"),
+                .product(name: "CustomDump", package: "swift-custom-dump")
             ]
         ),
         .executableTarget(

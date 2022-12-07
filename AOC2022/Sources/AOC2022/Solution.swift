@@ -19,6 +19,7 @@ public enum Day: Int {
     case four
     case five
     case six
+    case seven
 }
 
 extension Day {
@@ -36,6 +37,8 @@ extension Day {
             return Day05()
         case .six:
             return Day06()
+        case .seven:
+            return Day07()
         }
     }
 }
