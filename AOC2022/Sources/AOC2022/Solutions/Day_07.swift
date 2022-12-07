@@ -9,13 +9,19 @@ struct Day07: Solution {
             { String(data: $0, encoding: .utf8)! },
             Parsers.input.parse,
             calculateSizeMap,
-            with(100_000, flip(curry(findSmallDirectoryTotal))),
+            findSmallDirectoryTotal,
             String.init
         )(input)
     }
 
     func runPartTwo(input: Data) async throws -> String {
-        throw NotImplemented()
+        try pipe(
+            { String(data: $0, encoding: .utf8)! },
+            Parsers.input.parse,
+            calculateSizeMap,
+            findDeletionCandidate,
+            String.init
+        )(input)
     }
 
     enum Command: Equatable {
@@ -28,28 +34,33 @@ struct Day07: Solution {
         case file(Int, String)
     }
 
-    func calculateSizeMap(from commands: [Command]) -> [UUID: Int] {
-        var sizeMap: [UUID: Int] = [:]
+    struct Dir: Equatable, Hashable {
+        let name: String
+        let id: UUID = UUID()
+    }
+
+    func calculateSizeMap(from commands: [Command]) -> [Dir: Int] {
+        var sizeMap: [Dir: Int] = [:]
         // We'll track the node path and sizes using UUIDs because
         // that guarantees a unique key for each node even if there
         // are directories with the same name at different depths.
-        var path: [UUID] = []
+        var path: [Dir] = []
         for command in commands {
             switch command {
             case .cd(".."):
                 path.removeLast()
-            case .cd:
-                let nodeID = UUID()
-                path.append(nodeID)
-                sizeMap[nodeID] = 0
+            case let .cd(name):
+                let dir = Dir(name: name)
+                path.append(dir)
+                sizeMap[dir] = 0
             case let .ls(nodes):
                 for node in nodes {
                     switch node {
                     case .dir: break
                     case let .file(size, _):
-                        for nodeID in path {
-                            if let currentSize = sizeMap[nodeID] {
-                                sizeMap[nodeID] = currentSize + size
+                        for dir in path {
+                            if let currentSize = sizeMap[dir] {
+                                sizeMap[dir] = currentSize + size
                             }
                         }
                     }
@@ -59,12 +70,25 @@ struct Day07: Solution {
         return sizeMap
     }
 
-    func findSmallDirectoryTotal(in sizeMap: [UUID: Int], limit: Int) -> Int {
+    func findSmallDirectoryTotal(in sizeMap: [Dir: Int]) -> Int {
         sizeMap.reduce(into: 0) { partialResult, map in
-            if map.value <= limit {
+            if map.value <= 100_000 {
                 partialResult += map.value
             }
         }
+    }
+
+    func findDeletionCandidate(in sizeMap: [Dir: Int]) -> Int {
+        let totalSpace = 70_000_000
+        let unusedSpaceRequired = 30_000_000
+        // We'll assume there must always be a root
+        let root = sizeMap.keys.first { $0.name == "/" }!
+        let unusedSpace = totalSpace - sizeMap[root]!
+        let spaceRequired = unusedSpaceRequired - unusedSpace
+        return sizeMap
+            .filter { $0.value >= spaceRequired }
+            .sorted { $0.value < $1.value }
+            .first!.value
     }
 
     enum Parsers {

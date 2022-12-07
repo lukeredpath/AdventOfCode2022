@@ -61,9 +61,9 @@ final class Day07Tests: XCTestCase {
         XCTAssertEqual(answer, "95437")
     }
 
-    func _testSampleSolution_PartTwo() async throws {
+    func testSampleSolution_PartTwo() async throws {
         let solution = Day07()
         let answer = try await solution.runPartTwo(input: sampleInput.data(using: .utf8)!)
-        XCTAssertEqual(answer, "")
+        XCTAssertEqual(answer, "24933642")
     }
 }
