@@ -58,15 +58,28 @@ final class Day08Tests: XCTestCase {
         XCTAssertNoDifference(expected, Day08().parseInput(sampleInput))
     }
     
+    func testScenicScore() {
+        let grid = Day08.Grid(rows: [
+            [3, 0, 3, 7, 3],
+            [2, 5, 5, 1, 2],
+            [6, 5, 3, 3, 2],
+            [3, 3, 5, 4, 9],
+            [3, 5, 3, 9, 0]
+        ])
+        XCTAssertEqual(4, grid.sceneScore(atRow: 1, col: 2))
+        XCTAssertEqual(8, grid.sceneScore(atRow: 3, col: 2))
+        XCTAssertEqual(0, grid.sceneScore(atRow: 3, col: 4))
+    }
+    
     func testSampleSolution_PartOne() async throws {
         let solution = Day08()
         let answer = try await solution.runPartOne(input: sampleInput.data(using: .utf8)!)
         XCTAssertEqual(answer, "21")
     }
     
-    func _testSampleSolution_PartTwo() async throws {
+    func testSampleSolution_PartTwo() async throws {
         let solution = Day08()
         let answer = try await solution.runPartTwo(input: sampleInput.data(using: .utf8)!)
-        XCTAssertEqual(answer, "")
+        XCTAssertEqual(answer, "8")
     }
 }

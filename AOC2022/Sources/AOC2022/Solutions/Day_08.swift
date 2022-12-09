@@ -13,7 +13,12 @@ struct Day08: Solution {
     }
 
     func runPartTwo(input: Data) async throws -> String {
-        throw NotImplemented()
+        pipe(
+            utf8String,
+            parseInput,
+            findHighestScenicScore,
+            String.init
+        )(input)
     }
     
     struct Grid: Equatable {
@@ -48,20 +53,84 @@ struct Day08: Solution {
                 return true
             }
             // Otherwise, we need to look across the row and col in both directions.
-            let value = rows[rowIndex][colIndex]
-            if (0..<rowIndex).allSatisfy({ rows[$0][colIndex] < value }) {
+            let height = rows[rowIndex][colIndex]
+            // Look up
+            if (0..<rowIndex).allSatisfy({ rows[$0][colIndex] < height }) {
                 return true
             }
-            if (rowIndex + 1...rowUpperBound).allSatisfy({ rows[$0][colIndex] < value }) {
+            // Look down
+            if (rowIndex + 1...rowUpperBound).allSatisfy({ rows[$0][colIndex] < height }) {
                 return true
             }
-            if (0..<colIndex).allSatisfy({ rows[rowIndex][$0] < value }) {
+            // Look left
+            if (0..<colIndex).allSatisfy({ rows[rowIndex][$0] < height }) {
                 return true
             }
-            if (colIndex + 1...colUpperBound).allSatisfy({ rows[rowIndex][$0] < value }) {
+            // Look right
+            if (colIndex + 1...colUpperBound).allSatisfy({ rows[rowIndex][$0] < height }) {
                 return true
             }
             return false
+        }
+        
+        func sceneScore(atRow rowIndex: Int, col colIndex: Int) -> Int {
+            guard rowIndex < rowCount, colIndex < colCount else {
+                fatalError("(\(rowIndex), \(colIndex)) is out of bounds.")
+            }
+            // All perimeter trees will have a score of zero.
+            if rowIndex == 0 || rowIndex == rowUpperBound || colIndex == 0 || colIndex == colUpperBound {
+                return 0
+            }
+            let height = rows[rowIndex][colIndex]
+            let upCount = countVisible(
+                height: height,
+                rowIndices: Array(0..<rowIndex).reversed(),
+                col: colIndex
+            )
+            let downCount = countVisible(
+                height: height,
+                rowIndices: Array(rowIndex + 1...rowUpperBound),
+                col: colIndex
+            )
+            let leftCount = countVisible(
+                height: height,
+                colIndices: Array(0..<colIndex).reversed(),
+                row: rowIndex
+            )
+            let rightCount = countVisible(
+                height: height,
+                colIndices: Array(colIndex + 1...colUpperBound),
+                row: rowIndex
+            )
+            return (upCount * downCount * leftCount * rightCount)
+        }
+        
+        private func countVisible(height: Int, rowIndices: [Int], col colIndex: Int) -> Int {
+            var count: Int = 0
+            for rowIndex in rowIndices {
+                let thisHeight = rows[rowIndex][colIndex]
+                if thisHeight < height {
+                    count += 1
+                } else {
+                    count += 1
+                    break
+                }
+            }
+            return count
+        }
+        
+        private func countVisible(height: Int, colIndices: [Int], row rowIndex: Int) -> Int {
+            var count: Int = 0
+            for colIndex in colIndices {
+                let thisHeight = rows[rowIndex][colIndex]
+                if thisHeight < height {
+                    count += 1
+                } else {
+                    count += 1
+                    break
+                }
+            }
+            return count
         }
     }
     
@@ -73,6 +142,15 @@ struct Day08: Solution {
                 }
             }
         }
+    }
+    
+    func findHighestScenicScore(in grid: Grid) -> Int {
+        let scores = (0...grid.rowUpperBound).flatMap { rowIndex in
+            (0...grid.colUpperBound).map { colIndex in
+                grid.sceneScore(atRow: rowIndex, col: colIndex)
+            }
+        }
+        return scores.sorted().last!
     }
     
     func parseInput(_ input: String) -> Grid {
