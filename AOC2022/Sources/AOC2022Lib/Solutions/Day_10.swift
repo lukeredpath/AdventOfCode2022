@@ -61,9 +61,10 @@ struct Day10: Solution {
         var register: Int = 1
         var cycleCount: Int = 1
         var sprite: ClosedRange<Int> { (register - 1)...(register + 1) }
-        var currentPixel: Int { (cycleCount % 40) - 1 }
+        var currentPixel: Int { (cycleCount - 1) % 40 }
         func spinCycles(count: Int, pixels: inout [Pixel], onCompletion: () -> Void) {
             for _ in 0..<count {
+                print(currentPixel)
                 if sprite.contains(currentPixel) {
                     pixels.append(.lit)
                 } else {
