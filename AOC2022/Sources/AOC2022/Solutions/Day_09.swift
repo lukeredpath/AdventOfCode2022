@@ -3,20 +3,24 @@ import Overture
 import Parsing
 
 struct Day09: Solution {
-    private let start = Rope(.init(x: 0, y: 0), .init(x: 0, y: 0))
-    
     func runPartOne(input: Data) async throws -> String {
         try pipe(
             utf8String,
             Day09.Parsers.input.parse,
-            with(start, curry(moveMultiple)),
+            with(makeRope(knots: 2), curry(moveMultiple)),
             { $0.tails.count },
             String.init
         )(input)
     }
 
     func runPartTwo(input: Data) async throws -> String {
-        throw NotImplemented()
+        try pipe(
+            utf8String,
+            Day09.Parsers.input.parse,
+            with(makeRope(knots: 10), curry(moveMultiple)),
+            { $0.tails.count },
+            String.init
+        )(input)
     }
     
     struct Position: Hashable {
@@ -24,7 +28,24 @@ struct Day09: Solution {
         var y: Int
     }
     
-    typealias Rope = (head: Position, tail: Position)
+    struct Rope: Equatable {
+        var head: Position
+        var tail: Tail
+        var tailPosition: Position {
+            switch tail {
+            case let .rope(rope):
+                return rope.tailPosition
+            case let .tail(tail):
+                return tail
+            }
+        }
+        // A rope with multiple knots can consist of multiple embedded ropes
+        // until it reaches the final knot, represented as the tail case.
+        indirect enum Tail: Equatable {
+            case tail(Position)
+            case rope(Rope)
+        }
+    }
     
     enum Movement: Equatable {
         case up(Int)
@@ -33,66 +54,106 @@ struct Day09: Solution {
         case right(Int)
     }
     
-    /// Calculates the new position fro a start position given a movement, returning the new position and all of the unique places
-    /// occupied by the tail during the series of movements.
+    func makeRope(knots: Int) -> Rope {
+        // Start with the tail end and work towards the head.
+        var rope = Rope(head: .init(x: 0, y: 0), tail: .tail(.init(x: 0, y: 0)))
+        for _ in 0..<knots-2 {
+            rope = .init(head: .init(x: 0, y: 0), tail: .rope(rope))
+        }
+        return rope
+    }
+    
     func move(_ rope: Rope, _ movement: Movement) -> (rope: Rope, tails: Set<Position>) {
-        var head = rope.head
-        var tail = rope.tail
-        var tails: Set<Position> = [rope.tail]
-        
+        var rope = rope
+        var tails: Set<Position> = []
         switch movement {
         case let .up(steps):
             for _ in (0..<steps) {
-                head.y += 1
-                if tail.y < head.y - 1 {
-                    tail.y += 1
-                    if tail.x != head.x {
-                        tail.x = head.x
-                    }
-                }
-                tails.insert(tail)
+                movementStep(&rope, tailPositions: &tails, headMovement: { $0.y += 1 })
             }
         case let .down(steps):
             for _ in (0..<steps) {
-                head.y -= 1
-                // If the tail is on the same col, it just needs to move
-                // vertically to keep up.
-                if tail.y > head.y + 1 {
-                    tail.y -= 1
-                    if tail.x != head.x {
-                        tail.x = head.x
-                    }
-                }
-                tails.insert(tail)
+                movementStep(&rope, tailPositions: &tails, headMovement: { $0.y -= 1 })
             }
         case let .left(steps):
             for _ in (0..<steps) {
-                head.x -= 1
-                // If the tail is on the same row, it just needs to move
-                // laterally to keep up.
-                if tail.x > head.x + 1 {
-                    tail.x -= 1
-                    if tail.y != head.y {
-                        tail.y = head.y
-                    }
-                }
-                tails.insert(tail)
+                movementStep(&rope, tailPositions: &tails, headMovement: { $0.x -= 1 })
             }
         case let .right(steps):
             for _ in (0..<steps) {
-                head.x += 1
-                // If the tail is on the same row, it just needs to move
-                // laterally to keep up.
-                if tail.x < head.x - 1 {
-                    tail.x += 1
-                    if tail.y != head.y {
-                        tail.y = head.y
-                    }
-                }
-                tails.insert(tail)
+                movementStep(&rope, tailPositions: &tails, headMovement: { $0.x += 1 })
             }
         }
-        return (rope: (head: head, tail: tail), tails: tails)
+        return (rope: rope, tails: tails)
+    }
+    
+    private func movementStep(
+        _ rope: inout Rope,
+        tailPositions: inout Set<Position>,
+        headMovement: (inout Position) -> Void
+    ) {
+        headMovement(&rope.head)
+        switch rope.tail {
+        case var .rope(tailRope):
+            adjustTail(&tailRope.head, relativeTo: rope.head)
+            // We pass in a no-op head movement as we have already adjusted the tail head.
+            movementStep(&tailRope, tailPositions: &tailPositions, headMovement: { _ in })
+            rope.tail = .rope(tailRope)
+        case var .tail(position):
+            adjustTail(&position, relativeTo: rope.head)
+            rope.tail = .tail(position)
+            tailPositions.insert(position)
+        }
+    }
+    
+    private func adjustTail(_ position: inout Position, relativeTo otherPosition: Position) {
+        if position.y == otherPosition.y {
+            // They are at the same position vertically, adjust horizontally.
+            if position.x < otherPosition.x - 1 {
+                position.x = otherPosition.x - 1
+            } else if position.x > otherPosition.x + 1 {
+                position.x = otherPosition.x + 1
+            }
+        } else if position.x == otherPosition.x {
+            // They are at the same position horizontally, adjust vertically.
+            if position.y < otherPosition.y - 1 {
+                position.y = otherPosition.y - 1
+            } else if position.y > otherPosition.y + 1 {
+                position.y = otherPosition.y + 1
+            }
+        } else if (
+            position.x == otherPosition.x - 2 && position.y == otherPosition.y - 1 ||
+            position.x == otherPosition.x - 1 && position.y == otherPosition.y - 2 ||
+            position.x == otherPosition.x - 2 && position.y == otherPosition.y - 2
+        ) {
+            // tail needs to move up/right
+            position.x += 1
+            position.y += 1
+        } else if (
+            position.x == otherPosition.x - 2 && position.y == otherPosition.y + 1 ||
+            position.x == otherPosition.x - 1 && position.y == otherPosition.y + 2 ||
+            position.x == otherPosition.x - 2 && position.y == otherPosition.y + 2
+        ) {
+            // tail needs to move down/right
+            position.x += 1
+            position.y -= 1
+        } else if (
+            position.x == otherPosition.x + 2 && position.y == otherPosition.y - 1 ||
+            position.x == otherPosition.x + 1 && position.y == otherPosition.y - 2 ||
+            position.x == otherPosition.x + 2 && position.y == otherPosition.y - 2
+        ) {
+            // tail needs to move up/left
+            position.x -= 1
+            position.y += 1
+        } else if (
+            position.x == otherPosition.x + 2 && position.y == otherPosition.y + 1 ||
+            position.x == otherPosition.x + 1 && position.y == otherPosition.y + 2 ||
+            position.x == otherPosition.x + 2 && position.y == otherPosition.y + 2
+        ) {
+            // tail needs to move down/left
+            position.x -= 1
+            position.y -= 1
+        }
     }
     
     func moveMultiple(_ rope: Rope, movements: [Movement]) -> (rope: Rope, tails: Set<Position>) {
@@ -101,6 +162,17 @@ struct Day09: Solution {
             partialResult.rope = moveResult.rope
             partialResult.tails.formUnion(moveResult.tails)
         }
+    }
+    
+    func knotPositions(in rope: Rope) -> [Position] {
+        var positions: [Position] = [rope.head]
+        switch rope.tail {
+        case let .rope(rope):
+            positions.append(contentsOf: knotPositions(in: rope))
+        case let .tail(position):
+            positions.append(position)
+        }
+        return positions
     }
     
     enum Parsers {
