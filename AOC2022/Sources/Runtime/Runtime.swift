@@ -1,4 +1,4 @@
-import AOC2022
+import AOC2022Lib
 import ArgumentParser
 import Foundation
 

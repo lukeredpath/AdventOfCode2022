@@ -1,7 +1,7 @@
 import CustomDump
 import XCTest
 
-@testable import AOC2022
+@testable import AOC2022Lib
 
 final class Day04Tests: XCTestCase {
     let sampleInput = """

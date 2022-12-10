@@ -8,8 +8,8 @@ let package = Package(
     platforms: [.macOS(.v10_15)],
     products: [
         .library(
-            name: "AOC2022",
-            targets: ["AOC2022"]
+            name: "AOC2022Lib",
+            targets: ["AOC2022Lib"]
         ),
         .executable(
             name: "aoc2022",
@@ -36,7 +36,7 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "AOC2022",
+            name: "AOC2022Lib",
             dependencies: [
                 .product(name: "Parsing", package: "swift-parsing"),
                 .product(name: "Overture", package: "swift-overture"),
@@ -47,13 +47,13 @@ let package = Package(
             name: "Runtime",
             dependencies: [
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
-                "AOC2022"
+                "AOC2022Lib"
             ]
         ),
         .testTarget(
             name: "AOC2022Tests",
             dependencies: [
-                "AOC2022",
+                "AOC2022Lib",
                 .product(name: "CustomDump", package: "swift-custom-dump")
             ]
         ),
