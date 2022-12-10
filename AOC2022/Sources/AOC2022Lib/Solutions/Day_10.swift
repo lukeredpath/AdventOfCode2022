@@ -15,12 +15,22 @@ struct Day10: Solution {
     }
 
     func runPartTwo(input: Data) async throws -> String {
-        throw NotImplemented()
+        try pipe(
+            utf8String,
+            Parsers.input.parse,
+            captureScreenOutput,
+            printPixels
+        )(input)
     }
     
     enum Instruction {
         case noop
         case addx(Int)
+    }
+    
+    enum Pixel {
+        case lit
+        case dark
     }
     
     func captureCycles(_ cycleCounts: [Int], instructions: [Instruction]) -> [Int: Int] {
@@ -45,10 +55,57 @@ struct Day10: Solution {
         }
     }
     
+    let screenWidth = 40
+    
+    func captureScreenOutput(instructions: [Instruction]) -> [Pixel] {
+        var register: Int = 1
+        var cycleCount: Int = 1
+        var sprite: ClosedRange<Int> { (register - 1)...(register + 1) }
+        var currentPixel: Int { (cycleCount % 40) - 1 }
+        func spinCycles(count: Int, pixels: inout [Pixel], onCompletion: () -> Void) {
+            for _ in 0..<count {
+                if sprite.contains(currentPixel) {
+                    pixels.append(.lit)
+                } else {
+                    pixels.append(.dark)
+                }
+                cycleCount += 1
+            }
+            onCompletion()
+        }
+        return instructions.reduce(into: [Pixel]()) { pixels, instruction in
+            switch instruction {
+            case .noop:
+                spinCycles(count: 1, pixels: &pixels, onCompletion: {})
+            case let .addx(value):
+                spinCycles(count: 2, pixels: &pixels, onCompletion: { register += value })
+            }
+        }
+    }
+    
     func calculateSignalStrength(_ cycleValues: [Int: Int]) -> [Int: Int] {
         cycleValues.reduce(into: [:]) { cycleValues, element in
             cycleValues[element.key] = element.key * element.value
         }
+    }
+    
+    func printPixels(_ pixels: [Pixel]) -> String {
+        var output: String = ""
+        func render(_ pixel: Pixel, into string: inout String) {
+            switch pixel {
+            case .lit:
+                string.append("#")
+            case .dark:
+                string.append(".")
+            }
+        }
+        for x in (0..<pixels.count) {
+            render(pixels[x], into: &output)
+            if (x + 1) % screenWidth == 0 {
+                output.append("\n")
+            }
+        }
+        return output
     }
     
     enum Parsers {

@@ -198,6 +198,23 @@ final class Day10Tests: XCTestCase {
         ])
     }
     
+    func testPixelCapture() throws {
+        let input = try Day10.Parsers.input.parse(sampleInput.trimmingCharacters(in: .newlines))
+        let pixelValues = solution.captureScreenOutput(instructions: input)
+        XCTAssertEqual(240, pixelValues.count)
+        
+        let rendering = solution.printPixels(pixelValues)
+        XCTAssertNoDifference(rendering, """
+        ##..##..##..##..##..##..##..##..##..##..
+        ###...###...###...###...###...###...###.
+        ####....####....####....####....####....
+        #####.....#####.....#####.....#####.....
+        ######......######......######......###.
+        #######.......#######.......#######.....
+        
+        """)
+    }
+    
     func testSampleSolution_PartOne() async throws {
         let solution = Day10()
         let answer = try await solution.runPartOne(input: sampleInput.data(using: .utf8)!)

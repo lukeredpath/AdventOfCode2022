@@ -72,7 +72,8 @@ public func runSolution(for day: Day, puzzle: Puzzle, input: Data) async throws 
 }
 
 private func printAnswer(_ answer: String) {
-    print("The answer is: \(answer)")
+    print("The answer is:")
+    print(answer)
 }
 
 // MARK: - Utility
