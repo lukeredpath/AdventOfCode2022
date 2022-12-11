@@ -5,6 +5,11 @@ import Parsing
 struct Day11: Solution {
     struct GameState: Equatable {
         var monkeys: [Monkey] = []
+        var modulo: Int {
+            monkeys.dropFirst().reduce(monkeys[0].test.divisibleBy) {
+                $0 * $1.test.divisibleBy
+            }
+        }
     }
     
     struct Test: Equatable {
@@ -50,7 +55,13 @@ struct Day11: Solution {
     }
 
     func runPartTwo(input: Data) async throws -> String {
-        throw NotImplemented()
+        try pipe(
+            { String(data: $0, encoding: .utf8)! },
+            Parsers.input.parse,
+            with(10000, curry(runGameTwo)),
+            calculateMonkeyBusiness,
+            String.init
+        )(input)
     }
     
     func runGameOne(rounds: Int, state: GameState) -> GameState {
@@ -73,6 +84,36 @@ struct Day11: Solution {
         var monkey = state.monkeys[index]
         while var itemWorryLevel = monkey.pickUpNextItem() {
             itemWorryLevel = Int(Double(monkey.operation(itemWorryLevel)) / 3)
+            if itemWorryLevel.isMultiple(of: monkey.test.divisibleBy) {
+                state.monkeys[monkey.test.whenTrue].catchItem(itemWorryLevel)
+            } else {
+                state.monkeys[monkey.test.whenFalse].catchItem(itemWorryLevel)
+            }
+        }
+        state.monkeys[index] = monkey
+    }
+    
+    func runGameTwo(rounds: Int, state: GameState) -> GameState {
+        (1...rounds).reduce(state) { state, _ in
+            runRoundTwo(state)
+        }
+    }
+    
+    func runRoundTwo(_ state: GameState) -> GameState {
+        state.monkeys.indices.reduce(into: state) { partialResult, index in
+            takeTurnTwo(monkey: index, state: &partialResult)
+        }
+    }
+    
+    func takeTurnTwo(monkey index: Int, state: inout GameState) {
+        guard state.monkeys.indices.contains(index) else {
+            assertionFailure("Monkey does not exist at index \(index)")
+            return
+        }
+        var monkey = state.monkeys[index]
+        while var itemWorryLevel = monkey.pickUpNextItem() {
+            let result = Int(Double(monkey.operation(itemWorryLevel)))
+            itemWorryLevel = result % state.modulo
             if itemWorryLevel.isMultiple(of: monkey.test.divisibleBy) {
                 state.monkeys[monkey.test.whenTrue].catchItem(itemWorryLevel)
             } else {

@@ -164,12 +164,40 @@ final class Day11Tests: XCTestCase {
         XCTAssertNoDifference(result, expected)
     }
     
+    func testPartTwoRound() {
+        var state = Day11.GameState(monkeys: [
+            .init(
+                items: [79, 98],
+                operation: { $0 * 19 },
+                test: .init(divisibleBy: 23, whenTrue: 2, whenFalse: 3)
+            ),
+            .init(
+                items: [54, 65, 75, 74],
+                operation: { $0 + 6 },
+                test: .init(divisibleBy: 19, whenTrue: 2, whenFalse: 0)),
+            .init(
+                items: [79, 60, 97],
+                operation: { $0 * $0 },
+                test: .init(divisibleBy: 13, whenTrue: 1, whenFalse: 3)
+            ),
+            .init(
+                items: [74],
+                operation: { $0 + 3 },
+                test: .init(divisibleBy: 17, whenTrue: 0, whenFalse: 1)
+            )
+        ])
+        
+        state = solution.runRoundTwo(state)
+        
+        XCTAssertNoDifference(state.monkeys.map(\.inspectionCount), [2, 4, 3, 6])
+    }
+    
     func testSampleSolution_PartOne() async throws {
         let answer = try await solution.runPartOne(input: sampleInput.data(using: .utf8)!)
         XCTAssertEqual(answer, "10605")
     }
     
-    func _testSampleSolution_PartTwo() async throws {
+    func testSampleSolution_PartTwo() async throws {
         let answer = try await solution.runPartTwo(input: sampleInput.data(using: .utf8)!)
         XCTAssertEqual(answer, "2713310158")
     }
