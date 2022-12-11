@@ -50,13 +50,7 @@ struct Day11: Solution {
     }
 
     func runPartTwo(input: Data) async throws -> String {
-        try pipe(
-            { String(data: $0, encoding: .utf8)! },
-            Parsers.input.parse,
-            with(10000, curry(runGameTwo)),
-            calculateMonkeyBusiness,
-            String.init
-        )(input)
+        throw NotImplemented()
     }
     
     func runGameOne(rounds: Int, state: GameState) -> GameState {
@@ -65,32 +59,20 @@ struct Day11: Solution {
         }
     }
     
-    func runGameTwo(rounds: Int, state: GameState) -> GameState {
-        (1...rounds).reduce(state) { state, _ in
-            runRoundWorried(state)
-        }
-    }
-    
     func runRound(_ state: GameState) -> GameState {
         state.monkeys.indices.reduce(into: state) { partialResult, index in
-            takeTurn(monkey: index, state: &partialResult, worryAdjustment: { Int($0 / 3) })
+            takeTurn(monkey: index, state: &partialResult)
         }
     }
     
-    func runRoundWorried(_ state: GameState) -> GameState {
-        state.monkeys.indices.reduce(into: state) { partialResult, index in
-            takeTurn(monkey: index, state: &partialResult, worryAdjustment: { Int($0) })
-        }
-    }
-    
-    func takeTurn(monkey index: Int, state: inout GameState, worryAdjustment: (Double) -> Int) {
+    func takeTurn(monkey index: Int, state: inout GameState) {
         guard state.monkeys.indices.contains(index) else {
             assertionFailure("Monkey does not exist at index \(index)")
             return
         }
         var monkey = state.monkeys[index]
         while var itemWorryLevel = monkey.pickUpNextItem() {
-            itemWorryLevel = worryAdjustment(Double(monkey.operation(itemWorryLevel)))
+            itemWorryLevel = Int(Double(monkey.operation(itemWorryLevel)) / 3)
             if itemWorryLevel.isMultiple(of: monkey.test.divisibleBy) {
                 state.monkeys[monkey.test.whenTrue].catchItem(itemWorryLevel)
             } else {
