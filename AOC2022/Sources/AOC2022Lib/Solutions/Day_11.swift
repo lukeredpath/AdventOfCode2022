@@ -157,8 +157,8 @@ struct Day11: Solution {
                 Whitespace(4, .horizontal)
                 "If true: throw to monkey "
                 Int.parser()
+                Whitespace(1, .vertical)
             }
-            Whitespace(1, .vertical)
             Parse {
                 Whitespace(4, .horizontal)
                 "If false: throw to monkey "
