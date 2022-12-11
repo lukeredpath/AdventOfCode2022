@@ -182,6 +182,6 @@ final class Day11Tests: XCTestCase {
     
     func _testSampleSolution_PartTwo() async throws {
         let answer = try await solution.runPartTwo(input: sampleInput.data(using: .utf8)!)
-        XCTAssertEqual(answer, "")
+        XCTAssertEqual(answer, "2713310158")
     }
 }

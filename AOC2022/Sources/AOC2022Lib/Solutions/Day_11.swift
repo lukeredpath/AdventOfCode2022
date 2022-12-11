@@ -50,7 +50,13 @@ struct Day11: Solution {
     }
 
     func runPartTwo(input: Data) async throws -> String {
-        throw NotImplemented()
+        try pipe(
+            { String(data: $0, encoding: .utf8)! },
+            Parsers.input.parse,
+            with(10000, curry(runGameTwo)),
+            calculateMonkeyBusiness,
+            String.init
+        )(input)
     }
     
     func runGameOne(rounds: Int, state: GameState) -> GameState {
