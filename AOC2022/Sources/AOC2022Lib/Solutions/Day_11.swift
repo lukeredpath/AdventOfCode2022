@@ -43,7 +43,7 @@ struct Day11: Solution {
         try pipe(
             { String(data: $0, encoding: .utf8)! },
             Parsers.input.parse,
-            with(20, curry(runGame)),
+            with(20, curry(runGameOne)),
             calculateMonkeyBusiness,
             String.init
         )(input)
@@ -53,24 +53,38 @@ struct Day11: Solution {
         throw NotImplemented()
     }
     
-    func runGame(rounds: Int, state: GameState) -> GameState {
-        (1...rounds).reduce(state, { state, _ in runRound(state) })
+    func runGameOne(rounds: Int, state: GameState) -> GameState {
+        (1...rounds).reduce(state) { state, _ in
+            runRound(state)
+        }
+    }
+    
+    func runGameTwo(rounds: Int, state: GameState) -> GameState {
+        (1...rounds).reduce(state) { state, _ in
+            runRoundWorried(state)
+        }
     }
     
     func runRound(_ state: GameState) -> GameState {
         state.monkeys.indices.reduce(into: state) { partialResult, index in
-            takeTurn(monkey: index, state: &partialResult)
+            takeTurn(monkey: index, state: &partialResult, worryAdjustment: { Int($0 / 3) })
         }
     }
     
-    func takeTurn(monkey index: Int, state: inout GameState) {
+    func runRoundWorried(_ state: GameState) -> GameState {
+        state.monkeys.indices.reduce(into: state) { partialResult, index in
+            takeTurn(monkey: index, state: &partialResult, worryAdjustment: { Int($0) })
+        }
+    }
+    
+    func takeTurn(monkey index: Int, state: inout GameState, worryAdjustment: (Double) -> Int) {
         guard state.monkeys.indices.contains(index) else {
             assertionFailure("Monkey does not exist at index \(index)")
             return
         }
         var monkey = state.monkeys[index]
         while var itemWorryLevel = monkey.pickUpNextItem() {
-            itemWorryLevel = Int(Double(monkey.operation(itemWorryLevel)) / 3)
+            itemWorryLevel = worryAdjustment(Double(monkey.operation(itemWorryLevel)))
             if itemWorryLevel.isMultiple(of: monkey.test.divisibleBy) {
                 state.monkeys[monkey.test.whenTrue].catchItem(itemWorryLevel)
             } else {
@@ -89,8 +103,6 @@ struct Day11: Solution {
         enum Operator {
             case multiply
             case add
-            case minus
-            case divide
         }
         
         enum Operand {
@@ -110,8 +122,6 @@ struct Day11: Solution {
             OneOf {
                 "*".map(.case(Operator.multiply))
                 "+".map(.case(Operator.add))
-                "-".map(.case(Operator.minus))
-                "/".map(.case(Operator.divide))
             }
             " "
             OneOf {
@@ -132,10 +142,6 @@ struct Day11: Solution {
                     return oldValue * operand
                 case .add:
                     return oldValue + operand
-                case .minus:
-                    return oldValue - operand
-                case .divide:
-                    return oldValue / operand
                 }
             }
         }

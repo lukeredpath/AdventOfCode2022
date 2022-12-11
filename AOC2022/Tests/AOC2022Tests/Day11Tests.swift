@@ -45,7 +45,7 @@ final class Day11Tests: XCTestCase {
             .init(items: [2, 2, 4], operation: { $0 + 2 }, test: .init(divisibleBy: 2, whenTrue: 1, whenFalse: 0))
         ])
         
-        solution.takeTurn(monkey: 0, state: &state)
+        solution.takeTurn(monkey: 0, state: &state, worryAdjustment: { Int($0 / 3) })
         
         XCTAssertNoDifference(state.monkeys[0].items, [])
         XCTAssertNoDifference(state.monkeys[1].items, [5, 8, 1, 2, 6])
@@ -162,6 +162,17 @@ final class Day11Tests: XCTestCase {
         let result = try Day11.Parsers.input.parse(sampleInput)
         
         XCTAssertNoDifference(result, expected)
+    }
+    
+    func testWorriedGame() throws {
+        var state = try Day11.Parsers.input.parse(sampleInput)
+        state = solution.runGameTwo(rounds: 10000, state: state)
+        
+        XCTAssertEqual(state.monkeys[0].inspectionCount, 52166)
+        XCTAssertEqual(state.monkeys[1].inspectionCount, 47830)
+        XCTAssertEqual(state.monkeys[2].inspectionCount, 1938)
+        XCTAssertEqual(state.monkeys[3].inspectionCount, 52013)
+        XCTAssertEqual(solution.calculateMonkeyBusiness(from: state), 2713310158)
     }
     
     func testSampleSolution_PartOne() async throws {
