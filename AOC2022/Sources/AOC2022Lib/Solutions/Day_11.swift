@@ -66,54 +66,30 @@ struct Day11: Solution {
     
     func runGameOne(rounds: Int, state: GameState) -> GameState {
         (1...rounds).reduce(state) { state, _ in
-            runRound(state)
+            runRound(state, worryReducer: { Int(Double($0 / 3)) })
         }
-    }
-    
-    func runRound(_ state: GameState) -> GameState {
-        state.monkeys.indices.reduce(into: state) { partialResult, index in
-            takeTurn(monkey: index, state: &partialResult)
-        }
-    }
-    
-    func takeTurn(monkey index: Int, state: inout GameState) {
-        guard state.monkeys.indices.contains(index) else {
-            assertionFailure("Monkey does not exist at index \(index)")
-            return
-        }
-        var monkey = state.monkeys[index]
-        while var itemWorryLevel = monkey.pickUpNextItem() {
-            itemWorryLevel = Int(Double(monkey.operation(itemWorryLevel)) / 3)
-            if itemWorryLevel.isMultiple(of: monkey.test.divisibleBy) {
-                state.monkeys[monkey.test.whenTrue].catchItem(itemWorryLevel)
-            } else {
-                state.monkeys[monkey.test.whenFalse].catchItem(itemWorryLevel)
-            }
-        }
-        state.monkeys[index] = monkey
     }
     
     func runGameTwo(rounds: Int, state: GameState) -> GameState {
         (1...rounds).reduce(state) { state, _ in
-            runRoundTwo(state)
+            runRound(state, worryReducer: { $0 % state.modulo })
         }
     }
     
-    func runRoundTwo(_ state: GameState) -> GameState {
+    func runRound(_ state: GameState, worryReducer: (Int) -> Int) -> GameState {
         state.monkeys.indices.reduce(into: state) { partialResult, index in
-            takeTurnTwo(monkey: index, state: &partialResult)
+            takeTurn(monkey: index, state: &partialResult, worryReducer: worryReducer)
         }
     }
     
-    func takeTurnTwo(monkey index: Int, state: inout GameState) {
+    func takeTurn(monkey index: Int, state: inout GameState, worryReducer: (Int) -> Int) {
         guard state.monkeys.indices.contains(index) else {
             assertionFailure("Monkey does not exist at index \(index)")
             return
         }
         var monkey = state.monkeys[index]
         while var itemWorryLevel = monkey.pickUpNextItem() {
-            let result = Int(Double(monkey.operation(itemWorryLevel)))
-            itemWorryLevel = result % state.modulo
+            itemWorryLevel = worryReducer(monkey.operation(itemWorryLevel))
             if itemWorryLevel.isMultiple(of: monkey.test.divisibleBy) {
                 state.monkeys[monkey.test.whenTrue].catchItem(itemWorryLevel)
             } else {

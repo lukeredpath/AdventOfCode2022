@@ -45,7 +45,7 @@ final class Day11Tests: XCTestCase {
             .init(items: [2, 2, 4], operation: { $0 + 2 }, test: .init(divisibleBy: 2, whenTrue: 1, whenFalse: 0))
         ])
         
-        solution.takeTurn(monkey: 0, state: &state)
+        solution.takeTurn(monkey: 0, state: &state, worryReducer: { Int(Double($0) / 3) })
         
         XCTAssertNoDifference(state.monkeys[0].items, [])
         XCTAssertNoDifference(state.monkeys[1].items, [5, 8, 1, 2, 6])
@@ -75,7 +75,7 @@ final class Day11Tests: XCTestCase {
             )
         ])
         
-        state = solution.runRound(state)
+        state = solution.runRound(state, worryReducer: { Int(Double($0) / 3) })
         
         XCTAssertNoDifference(state.monkeys[0].items, [20, 23, 27, 26])
         XCTAssertNoDifference(state.monkeys[1].items, [2080, 25, 167, 207, 401, 1046])
@@ -84,7 +84,7 @@ final class Day11Tests: XCTestCase {
         
         // Test many more rounds
         for _ in 1...19 {
-            state = solution.runRound(state)
+            state = solution.runRound(state, worryReducer: { Int(Double($0) / 3) })
         }
         
         XCTAssertNoDifference(state.monkeys[0].items, [10, 12, 14, 26, 34])
@@ -187,7 +187,7 @@ final class Day11Tests: XCTestCase {
             )
         ])
         
-        state = solution.runRoundTwo(state)
+        state = solution.runRound(state, worryReducer: { $0 % state.modulo })
         
         XCTAssertNoDifference(state.monkeys.map(\.inspectionCount), [2, 4, 3, 6])
     }
