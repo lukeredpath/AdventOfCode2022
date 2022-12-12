@@ -14,18 +14,23 @@ struct Day12: Solution {
         pipe(
             utf8String,
             parseInput,
-            findShortestRoute,
+            findShortestRouteFromStart,
             String.init
         )(input)
     }
 
     func runPartTwo(input: Data) async throws -> String {
-        throw NotImplemented()
+        pipe(
+            utf8String,
+            parseInput,
+            findShortestRouteFromAllLowestPoints,
+            String.init
+        )(input)
     }
     
     func findStartAndFinish(in grid: Grid) -> (start: Point, finish: Point) {
-        var start: Point?
-        var finish: Point?
+        var start: Point!
+        var finish: Point!
         for rowIndex in grid.indices {
             for charIndex in grid[rowIndex].indices {
                 if grid[rowIndex][charIndex] == "S" {
@@ -36,21 +41,48 @@ struct Day12: Solution {
                 }
             }
         }
-        return (start: start!, finish: finish!)
+        return (start: start, finish: finish)
     }
     
-    func findShortestRoute(in grid: Grid) -> Int {
+    func findAllLowStartAndFinishPoints(in grid: Grid) -> [(start: Point, finish: Point)] {
+        var starts: [Point] = []
+        var finish: Point!
+        for rowIndex in grid.indices {
+            for charIndex in grid[rowIndex].indices {
+                if grid[rowIndex][charIndex] == "a" {
+                    starts.append(Point(x: charIndex, y: rowIndex))
+                }
+                if grid[rowIndex][charIndex] == "E" {
+                    finish = Point(x: charIndex, y: rowIndex)
+                }
+            }
+        }
+        return starts.map { (start: $0, finish: finish) }
+    }
+    
+    func findShortestRouteFromStart(in grid: Grid) -> Int {
         let coords = findStartAndFinish(in: grid)
-        // dijktstra
+        return findShortestRoute(in: grid, from: coords.start, to: coords.finish)!
+    }
+    
+    func findShortestRouteFromAllLowestPoints(in grid: Grid) -> Int {
+        let allCoords = findAllLowStartAndFinishPoints(in: grid)
+        let pathLengths = allCoords.compactMap { coords in
+            findShortestRoute(in: grid, from: coords.start, to: coords.finish)
+        }
+        return pathLengths.sorted().first!
+    }
+    
+    private func findShortestRoute(in grid: Grid, from startPoint: Point, to endPoint: Point) -> Int? {
         let allPoints = pointsInGrid(grid)
-        var distances: [Point: Int] = [coords.start: 0]
+        var distances: [Point: Int] = [startPoint: 0]
         var queue = PriorityQueue<Point> {
             distances[$0, default: .max] < distances[$1, default: .max]
         }
-        queue.enqueue(coords.start)
+        queue.enqueue(startPoint)
         
         while let node = queue.dequeue() {
-            guard node != coords.finish else { break }
+            guard node != endPoint else { break }
             
             let nodeValue = lookupValue(in: grid, at: node)
             
@@ -86,8 +118,7 @@ struct Day12: Solution {
                 }
             }
         }
-        
-        return distances[coords.finish]!
+        return distances[endPoint]
     }
     
     func lookupValue(in grid: Grid, at point: Point) -> Int {

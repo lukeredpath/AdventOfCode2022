@@ -30,8 +30,14 @@ final class Day12Tests: XCTestCase {
     
     func testFindShortestPath() {
         let grid = solution.parseInput(sampleInput)
-        let shortestPath = solution.findShortestRoute(in: grid)
+        let shortestPath = solution.findShortestRouteFromStart(in: grid)
         XCTAssertEqual(31, shortestPath)
+    }
+    
+    func testFindShortestPathFromAllLowPoints() {
+        let grid = solution.parseInput(sampleInput)
+        let shortestPath = solution.findShortestRouteFromAllLowestPoints(in: grid)
+        XCTAssertEqual(29, shortestPath)
     }
     
     func testSampleSolution_PartOne() async throws {
@@ -39,8 +45,8 @@ final class Day12Tests: XCTestCase {
         XCTAssertEqual(answer, "31")
     }
     
-    func _testSampleSolution_PartTwo() async throws {
+    func testSampleSolution_PartTwo() async throws {
         let answer = try await solution.runPartTwo(input: sampleInput.data(using: .utf8)!)
-        XCTAssertEqual(answer, "")
+        XCTAssertEqual(answer, "29")
     }
 }
