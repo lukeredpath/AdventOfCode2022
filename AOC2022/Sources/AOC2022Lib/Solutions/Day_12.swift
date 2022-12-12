@@ -49,7 +49,7 @@ struct Day12: Solution {
         var finish: Point!
         for rowIndex in grid.indices {
             for charIndex in grid[rowIndex].indices {
-                if grid[rowIndex][charIndex] == "a" {
+                if grid[rowIndex][charIndex] == "a" || grid[rowIndex][charIndex] == "S" {
                     starts.append(Point(x: charIndex, y: rowIndex))
                 }
                 if grid[rowIndex][charIndex] == "E" {
