@@ -141,8 +141,36 @@ final class Day13Tests: XCTestCase {
         XCTAssertEqual(answer, "13")
     }
 
-    func _testSampleSolution_PartTwo() async throws {
+    func testSampleSolution_PartTwo() async throws {
+        // We can also print the ordered packets to help verify the output.
+        let pairs = try Day13.Parsers.input.parse(sampleInput.trimmingCharacters(in: .newlines))
+        var packets = solution.flattenPacketPairs(pairs)
+        packets = solution.appendDividerPackets(to: packets)
+        packets = solution.sortPackets(packets)
+
+        let output = try Day13.Parsers.packets.print(packets)
+        XCTAssertNoDifference(output, """
+        []
+        [[]]
+        [[[]]]
+        [1,1,3,1,1]
+        [1,1,5,1,1]
+        [[1],[2,3,4]]
+        [1,[2,[3,[4,[5,6,0]]]],8,9]
+        [1,[2,[3,[4,[5,6,7]]]],8,9]
+        [[1],4]
+        [[2]]
+        [3]
+        [[4,4],4,4]
+        [[4,4],4,4,4]
+        [[6]]
+        [7,7,7]
+        [7,7,7,7]
+        [[8,7,6]]
+        [9]
+        """)
+
         let answer = try await solution.runPartTwo(input: sampleInput.data(using: .utf8)!)
-        XCTAssertEqual(answer, "")
+        XCTAssertEqual(answer, "140")
     }
 }

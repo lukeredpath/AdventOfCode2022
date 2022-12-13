@@ -11,6 +11,9 @@ struct Day13: Solution {
         case list([Value])
     }
 
+    let dividerPacketOne: Value = .list([.int(2)])
+    let dividerPacketTwo: Value = .list([.int(6)])
+
     enum ComparisonResult {
         case correctOrder
         case wrongOrder
@@ -28,7 +31,44 @@ struct Day13: Solution {
     }
 
     func runPartTwo(input: Data) async throws -> String {
-        throw NotImplemented()
+        try pipe(
+            utf8String,
+            pipe(
+                Parsers.input.parse,
+                flattenPacketPairs,
+                appendDividerPackets
+            ),
+            sortPackets,
+            determineDecoderKey,
+            String.init
+        )(input)
+    }
+
+    func flattenPacketPairs(_ pairs: [PacketPair]) -> [Packet] {
+        pairs.reduce(into: []) { packets, pair in
+            packets.append(pair.left)
+            packets.append(pair.right)
+        }
+    }
+
+    func appendDividerPackets(to packets: [Packet]) -> [Packet] {
+        var packets = packets
+        packets.append(contentsOf: [[dividerPacketOne], [dividerPacketTwo]])
+        return packets
+    }
+
+    func sortPackets(_ packets: [Packet]) -> [Packet] {
+        packets.sorted(by: comparePackets)
+    }
+
+    func determineDecoderKey(in packets: [Packet]) -> Int {
+        let dividerIndices = packets.indices.filter { index in
+            packets[index] == [dividerPacketOne] ||
+            packets[index] == [dividerPacketTwo]
+        }
+        assert(dividerIndices.count == 2)
+        // Packet indices are 1-based so we should adjust.
+        return (dividerIndices[0] + 1) * (dividerIndices[1] + 1)
     }
 
     func findIndicesForMatchingPackets(in pairs: [PacketPair]) -> [Int] {
@@ -81,28 +121,34 @@ struct Day13: Solution {
     }
 
     enum Parsers {
-        static var value: AnyParser<Substring, Value> {
+        static var value: AnyParserPrinter<Substring, Value> {
             OneOf {
-                Int.parser().map(Value.int)
-                Lazy { list.map(Value.list) }
+                Int.parser().map(.case(Value.int))
+                Lazy { list.map(.case(Value.list)) }
             }
-            .eraseToAnyParser()
+            .eraseToAnyParserPrinter()
         }
 
-        static var list: AnyParser<Substring, [Value]> {
-            Parse {
+        static var list: AnyParserPrinter<Substring, [Value]> {
+            ParsePrint {
                 "["
                 Many { value } separator: { "," }
                 "]"
             }
-            .eraseToAnyParser()
+            .eraseToAnyParserPrinter()
         }
 
-        static let packetPair = Parse {
+        static let packetPair = ParsePrint {
             list
             Whitespace(1, .vertical)
             list
         }.map { (left: $0, right: $1) }
+
+        static let packets = Many {
+            list
+        } separator: {
+            Whitespace(1, .vertical)
+        }
 
         static let input = Many {
             packetPair
