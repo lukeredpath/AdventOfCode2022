@@ -40,19 +40,16 @@ struct Day14: Solution {
         var grainCount: Int = 0
         var reachedAbyss = false
         while !reachedAbyss {
-            let previousMap = map
-            map = simulateSand(on: map, startingPoint: startingPoint)
-            if map == previousMap {
-                reachedAbyss = true
-            } else {
+            if simulateSand(on: &map, startingPoint: startingPoint) {
                 grainCount += 1
+            } else {
+                reachedAbyss = true
             }
         }
         return grainCount
     }
 
-    func simulateSand(on map: NodeMap, startingPoint: Point) -> NodeMap {
-        var map = map
+    func simulateSand(on map: inout NodeMap, startingPoint: Point) -> Bool {
         // We pass the point of the lowest rock as the threshold for the
         // next step as any point below that will result in the sand falling
         // into the "abyss".
@@ -65,8 +62,9 @@ struct Day14: Solution {
         // lowest rock - if it is, we should let it fall into the abyss.
         if currentPoint.y < lowestRock.y {
             map[currentPoint] = .sand
+            return true
         }
-        return map
+        return false
     }
 
     private func nextStep(on map: NodeMap, from point: Point, threshold: Point) -> Point? {

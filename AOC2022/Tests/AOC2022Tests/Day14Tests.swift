@@ -95,7 +95,7 @@ final class Day14Tests: XCTestCase {
 
         let startingPoint = Day14.Point(x: 500, y: 0)
 
-        map = solution.simulateSand(on: map, startingPoint: startingPoint)
+        XCTAssert(solution.simulateSand(on: &map, startingPoint: startingPoint))
 
         XCTAssertEqual(map[Day14.Point(x: 500, y: 8)], .sand)
 
@@ -109,7 +109,7 @@ final class Day14Tests: XCTestCase {
 
         """)
 
-        map = solution.simulateSand(on: map, startingPoint: startingPoint)
+        XCTAssert(solution.simulateSand(on: &map, startingPoint: startingPoint))
 
         XCTAssertEqual(map[Day14.Point(x: 499, y: 8)], .sand)
 
@@ -123,7 +123,7 @@ final class Day14Tests: XCTestCase {
 
         """)
 
-        map = solution.simulateSand(on: map, startingPoint: startingPoint)
+        XCTAssert(solution.simulateSand(on: &map, startingPoint: startingPoint))
 
         XCTAssertEqual(map[Day14.Point(x: 501, y: 8)], .sand)
 
@@ -139,7 +139,7 @@ final class Day14Tests: XCTestCase {
 
         // Lets simulate another 19 grains of sand like the example given.
         for x in (0..<19) {
-            map = solution.simulateSand(on: map, startingPoint: startingPoint)
+            XCTAssert(solution.simulateSand(on: &map, startingPoint: startingPoint))
         }
 
         XCTAssertNoDifference(solution.printMap(map), """
@@ -154,7 +154,7 @@ final class Day14Tests: XCTestCase {
 
         """)
 
-        map = solution.simulateSand(on: map, startingPoint: startingPoint)
+        XCTAssert(solution.simulateSand(on: &map, startingPoint: startingPoint))
 
         XCTAssertNoDifference(solution.printMap(map), """
         ......o...
@@ -168,7 +168,7 @@ final class Day14Tests: XCTestCase {
 
         """)
 
-        map = solution.simulateSand(on: map, startingPoint: startingPoint)
+        XCTAssert(solution.simulateSand(on: &map, startingPoint: startingPoint))
 
         XCTAssertNoDifference(solution.printMap(map), """
         ......o...
@@ -183,7 +183,7 @@ final class Day14Tests: XCTestCase {
         """)
 
         // This grain should fall off the map.
-        map = solution.simulateSand(on: map, startingPoint: startingPoint)
+        XCTAssertFalse(solution.simulateSand(on: &map, startingPoint: startingPoint))
 
         XCTAssertNoDifference(solution.printMap(map), """
         ......o...
