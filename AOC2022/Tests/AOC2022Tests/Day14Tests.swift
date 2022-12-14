@@ -83,6 +83,8 @@ final class Day14Tests: XCTestCase {
             Day14.Point(x: 494, y: 9)
         ], on: map, as: .rock)
 
+        let floor = solution.lowestRock(in: map).y
+
         XCTAssertNoDifference(solution.printMap(map), """
         ....#...##
         ....#...#.
@@ -95,7 +97,7 @@ final class Day14Tests: XCTestCase {
 
         let startingPoint = Day14.Point(x: 500, y: 0)
 
-        XCTAssert(solution.simulateSand(on: &map, startingPoint: startingPoint))
+        XCTAssert(solution.simulateSand(on: &map, startingPoint: startingPoint, floor: floor, canFallThroughFloor: true))
 
         XCTAssertEqual(map[Day14.Point(x: 500, y: 8)], .sand)
 
@@ -109,7 +111,7 @@ final class Day14Tests: XCTestCase {
 
         """)
 
-        XCTAssert(solution.simulateSand(on: &map, startingPoint: startingPoint))
+        XCTAssert(solution.simulateSand(on: &map, startingPoint: startingPoint, floor: floor, canFallThroughFloor: true))
 
         XCTAssertEqual(map[Day14.Point(x: 499, y: 8)], .sand)
 
@@ -123,7 +125,7 @@ final class Day14Tests: XCTestCase {
 
         """)
 
-        XCTAssert(solution.simulateSand(on: &map, startingPoint: startingPoint))
+        XCTAssert(solution.simulateSand(on: &map, startingPoint: startingPoint, floor: floor, canFallThroughFloor: true))
 
         XCTAssertEqual(map[Day14.Point(x: 501, y: 8)], .sand)
 
@@ -138,8 +140,8 @@ final class Day14Tests: XCTestCase {
         """)
 
         // Lets simulate another 19 grains of sand like the example given.
-        for x in (0..<19) {
-            XCTAssert(solution.simulateSand(on: &map, startingPoint: startingPoint))
+        for _ in (0..<19) {
+            XCTAssert(solution.simulateSand(on: &map, startingPoint: startingPoint, floor: floor, canFallThroughFloor: true))
         }
 
         XCTAssertNoDifference(solution.printMap(map), """
@@ -154,7 +156,7 @@ final class Day14Tests: XCTestCase {
 
         """)
 
-        XCTAssert(solution.simulateSand(on: &map, startingPoint: startingPoint))
+        XCTAssert(solution.simulateSand(on: &map, startingPoint: startingPoint, floor: floor, canFallThroughFloor: true))
 
         XCTAssertNoDifference(solution.printMap(map), """
         ......o...
@@ -168,7 +170,7 @@ final class Day14Tests: XCTestCase {
 
         """)
 
-        XCTAssert(solution.simulateSand(on: &map, startingPoint: startingPoint))
+        XCTAssert(solution.simulateSand(on: &map, startingPoint: startingPoint, floor: floor, canFallThroughFloor: true))
 
         XCTAssertNoDifference(solution.printMap(map), """
         ......o...
@@ -183,7 +185,7 @@ final class Day14Tests: XCTestCase {
         """)
 
         // This grain should fall off the map.
-        XCTAssertFalse(solution.simulateSand(on: &map, startingPoint: startingPoint))
+        XCTAssertFalse(solution.simulateSand(on: &map, startingPoint: startingPoint, floor: floor, canFallThroughFloor: true))
 
         XCTAssertNoDifference(solution.printMap(map), """
         ......o...
@@ -214,9 +216,39 @@ final class Day14Tests: XCTestCase {
             Day14.Point(x: 494, y: 9)
         ], on: map, as: .rock)
 
-        let result = solution.simulateGrains(on: map, startingPoint: .init(x: 500, y: 0))
+        let floor = solution.lowestRock(in: map).y
+
+        let result = solution.simulateGrains(on: map, startingPoint: .init(x: 500, y: 0), floor: floor)
 
         XCTAssertEqual(24, result)
+    }
+
+    func testFullSimulation_Part2() {
+        var map: Day14.NodeMap = [:]
+
+        map = solution.tracePath([
+            Day14.Point(x: 498, y: 4),
+            Day14.Point(x: 498, y: 6),
+            Day14.Point(x: 496, y: 6)
+        ], on: map, as: .rock)
+
+        map = solution.tracePath([
+            Day14.Point(x: 503, y: 4),
+            Day14.Point(x: 502, y: 4),
+            Day14.Point(x: 502, y: 9),
+            Day14.Point(x: 494, y: 9)
+        ], on: map, as: .rock)
+
+        let floor = solution.lowestRock(in: map).y + 2
+
+        let result = solution.simulateGrains(
+            on: map,
+            startingPoint: .init(x: 500, y: 0),
+            floor: floor,
+            canFallThroughFloor: false
+        )
+
+        XCTAssertEqual(93, result)
     }
 
     func testParsing() throws {
@@ -248,8 +280,8 @@ final class Day14Tests: XCTestCase {
         XCTAssertEqual(answer, "24")
     }
 
-    func _testSampleSolution_PartTwo() async throws {
+    func testSampleSolution_PartTwo() async throws {
         let answer = try await solution.runPartTwo(input: sampleInput.data(using: .utf8)!)
-        XCTAssertEqual(answer, "")
+        XCTAssertEqual(answer, "93")
     }
 }

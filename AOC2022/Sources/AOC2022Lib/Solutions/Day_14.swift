@@ -20,13 +20,19 @@ struct Day14: Solution {
             utf8String,
             Parsers.input.parse,
             generateRockMap,
-            with(.init(x: 500, y: 0), flip(curry(simulateGrains))),
+            simulateGrainsPartOne,
             String.init
         )(input)
     }
 
     func runPartTwo(input: Data) async throws -> String {
-        throw NotImplemented()
+        try pipe(
+            utf8String,
+            Parsers.input.parse,
+            generateRockMap,
+            simulateGrainsPartTwo,
+            String.init
+        )(input)
     }
 
     func generateRockMap(paths: [[Point]]) -> NodeMap {
@@ -35,48 +41,76 @@ struct Day14: Solution {
         }
     }
 
-    func simulateGrains(on map: NodeMap, startingPoint: Point) -> Int {
+    func simulateGrainsPartOne(on map: NodeMap) -> Int {
+        simulateGrains(
+            on: map,
+            startingPoint: .init(x: 500, y: 0),
+            floor: lowestRock(in: map).y
+        )
+    }
+
+    func simulateGrainsPartTwo(on map: NodeMap) -> Int {
+        simulateGrains(
+            on: map,
+            startingPoint: .init(x: 500, y: 0),
+            floor: lowestRock(in: map).y + 2,
+            canFallThroughFloor: false
+        )
+    }
+
+    func simulateGrains(
+        on map: NodeMap,
+        startingPoint: Point,
+        floor: Int,
+        canFallThroughFloor: Bool = true
+    ) -> Int {
         var map = map
-        var grainCount: Int = 0
-        var reachedAbyss = false
-        while !reachedAbyss {
-            if simulateSand(on: &map, startingPoint: startingPoint) {
-                grainCount += 1
-            } else {
-                reachedAbyss = true
+        while true {
+            if !simulateSand(on: &map, startingPoint: startingPoint, floor: floor, canFallThroughFloor: canFallThroughFloor) {
+                break
             }
         }
-        return grainCount
+        return map.filter { $0.value == .sand }.count
     }
 
-    func simulateSand(on map: inout NodeMap, startingPoint: Point) -> Bool {
-        // We pass the point of the lowest rock as the threshold for the
-        // next step as any point below that will result in the sand falling
-        // into the "abyss".
-        let lowestRock = lowestRock(in: map)
+    func simulateSand(
+        on map: inout NodeMap,
+        startingPoint: Point,
+        floor: Int,
+        canFallThroughFloor: Bool
+    ) -> Bool {
         var currentPoint = startingPoint
-        while let nextPoint = nextStep(on: map, from: currentPoint, threshold: lowestRock) {
+        while let nextPoint = nextStep(on: map, from: currentPoint, yThreshold: floor) {
             currentPoint = nextPoint
         }
-        // We need to double-check the current point is not on the same level as the
-        // lowest rock - if it is, we should let it fall into the abyss.
-        if currentPoint.y < lowestRock.y {
+        if currentPoint == startingPoint {
+            // The starting point is now blocked and no more sand can come to a rest.
             map[currentPoint] = .sand
-            return true
+            return false
         }
-        return false
+        if currentPoint.y == floor && canFallThroughFloor {
+            // If we've reached the lowest rocks the sand will fall through into the abyss.
+            return false
+        }
+        if currentPoint.y == floor {
+            // Otherwise we've reached the real floor, so the grain will rest on the
+            // point directly above.
+            currentPoint = .init(x: currentPoint.x, y: currentPoint.y - 1)
+        }
+        map[currentPoint] = .sand
+        return true
     }
 
-    private func nextStep(on map: NodeMap, from point: Point, threshold: Point) -> Point? {
+    private func nextStep(on map: NodeMap, from point: Point, yThreshold: Int) -> Point? {
         let candidates: [Point] = [
             Point(x: point.x, y: point.y + 1), // down
             Point(x: point.x - 1, y: point.y + 1), // down/left
             Point(x: point.x + 1, y: point.y + 1) // down/right
         ]
         return candidates.first {
-            // Any node that does not contain rock or sand and is not
-            // below the threshold (the lowest rock) is suitable.
-            !map.keys.contains($0) && $0.y <= threshold.y
+            // Any node that does not contain rock or sand and is
+            // at or above the y threshold is a valid candidate.
+            return !map.keys.contains($0) && $0.y <= yThreshold
         }
     }
 
@@ -113,15 +147,22 @@ struct Day14: Solution {
         }
     }
 
-    private func lowestRock(in map: NodeMap) -> Point {
+    func lowestRock(in map: NodeMap) -> Point {
         map.keys.filter { map[$0] == .rock }.sorted { $0.y < $1.y }.last!
     }
 
-    func printMap(_ map: NodeMap) -> String {
+    func printMap(_ map: NodeMap, floor: Int? = nil) -> String {
         let sortedX = map.keys.sorted { $0.x < $1.x }
-        let xBounds = (sortedX.first!.x...sortedX.last!.x)
         let sortedY = map.keys.sorted { $0.y < $1.y }
-        let yBounds = (sortedY.first!.y...sortedY.last!.y)
+        let xBounds: ClosedRange<Int>
+        let yBounds: ClosedRange<Int>
+        if let floor {
+            xBounds = (sortedX.first!.x-2...sortedX.last!.x+2)
+            yBounds = (sortedY.first!.y...floor)
+        } else {
+            xBounds = (sortedX.first!.x...sortedX.last!.x)
+            yBounds = (sortedY.first!.y...sortedY.last!.y)
+        }
         var output = ""
         for y in yBounds {
             for x in xBounds {
@@ -132,7 +173,11 @@ struct Day14: Solution {
                 case .rock:
                     output.append("#")
                 case .none:
-                    output.append(".")
+                    if point.y == floor {
+                        output.append("#")
+                    } else {
+                        output.append(".")
+                    }
                 }
             }
             output.append("\n")
